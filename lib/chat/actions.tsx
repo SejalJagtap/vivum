@@ -115,7 +115,7 @@ async function confirmPurchase(symbol: string, price: number, amount: number) {
     }
   }
 }
-
+import { CohereClient } from "cohere-ai";
 async function submitUserMessage(content: string) {
   'use server'
 
@@ -133,75 +133,204 @@ async function submitUserMessage(content: string) {
     ]
   })
 
-  // try {
-  const response = await fetch('https://api.cohere.ai/v1/generate', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': 'Bearer kV2pbztTIPM8H1lqkH6JyvJNoEof03K4GSAXh6kQ',
-    },
-    body: JSON.stringify({
-      prompt: content,
-      model: 'command-nightly',
-      max_tokens: 300,
-      stop_sequences: [],
-      temperature: 0.9,
-      return_likelihoods: 'NONE',
-      stream: true
-    })
+  const cohere = new CohereClient({
+    token: "OnUumoosME9Y9pZO99rkRgQSKir9QylPor1bhkjg",
   });
-
-  if (!response.ok) {
-    throw new Error(`Error ${response.status}: ${await response.text()}`);
-  }
-  // if (response.ok) {
-  //   throw new Error(`Error bale bale${response.status}: ${await response.text()}`);
-  // }
-
-  const responseText = await response.text();
-  const responseBodyArray = responseText.trim().split('\n');
-
-  let botMessageContent = '';
-
-  for (const responseBody of responseBodyArray) {
-    const parsedResponse = JSON.parse(responseBody);
-    if (parsedResponse.text) {
-      botMessageContent += parsedResponse.text;
-    }
-  }
-
-  console.log(botMessageContent);
-  // const responseBody = await response.json();
-  // console.log(responseBody);
-  // const botMessageContent = responseBody.text;
-
-
-  aiState.done({
-    ...aiState.get(),
-    messages: [
-      ...aiState.get().messages,
+  const config = {
+    message: content,
+    chat_history: [],
+    temperature: 0.3,
+    model: "command-r",
+    stream: true,
+    connectors: [
       {
-        id: nanoid(),
-        role: 'assistant',
-        content: botMessageContent
+        "id": "web-search",
+        "options": {
+          "site": "https://www.ncbi.nlm.nih.gov/pmc/"
+        }
       }
-    ]
-  });
-
-  return {
-    id: nanoid(),
-    display: <BotMessage content={botMessageContent} />
+    ],
+    prompt_truncation: "AUTO"
   };
-  // } catch (error) {
-  //   console.error('Error submitting user message:', error);
+  try {
+    const chat = await cohere.chat(config);
 
-  //   // Return an error message to display in the UI
-  //   return {
-  //     id: nanoid(),
-  //     display: <SystemMessage>Error processing user message. Please try again later.</SystemMessage>
-  //   };
-  // }
+    console.log(chat.documents);
+
+    const documents = chat.documents;
+    const documentUrls = documents ? Object.values(documents).map(doc => doc.url + "\n") : [];// Extract keys from the JSON object
+
+    // Output the document IDs
+    console.log(documentUrls);
+    const botMessageContent = chat.text + "\n" + "Sources: " + documentUrls;
+
+
+
+
+
+    // Add documents from chat response to AI state
+    // Object.keys(chat.documents).forEach(url => {
+    //   aiState.update({
+    //     ...aiState.get(),
+    //     messages: [
+    //       ...aiState.get().messages,
+    //       {
+    //         id: nanoid(),
+    //         role: 'data',
+    //         content: chat.documents[url]
+    //       }
+    //     ]
+    //   });
+    // });
+
+    aiState.done({
+      ...aiState.get(),
+      messages: [
+        ...aiState.get().messages,
+        {
+          id: nanoid(),
+          role: 'assistant',
+          content: botMessageContent
+        }
+      ]
+    });
+
+    return {
+      id: nanoid(),
+      display: <BotMessage content={botMessageContent} />
+    };
+  } catch (error) {
+    console.error('Error submitting user message:', error);
+
+    // Return an error message to display in the UI
+    return {
+      id: nanoid(),
+      display: <SystemMessage>Error processing user message. Please try again later.</SystemMessage>
+    };
+  }
 }
+
+// async function submitUserMessage(content: string) {
+//   'use server'
+
+//   const aiState = getMutableAIState<typeof AI>()
+
+//   aiState.update({
+//     ...aiState.get(),
+//     messages: [
+//       ...aiState.get().messages,
+//       {
+//         id: nanoid(),
+//         role: 'user',
+//         content
+//       }
+//     ]
+//   })
+//   const cohere = new CohereClient({
+//     token: "OnUumoosME9Y9pZO99rkRgQSKir9QylPor1bhkjg",
+//   });
+
+//   (async () => {
+//     const chat = await cohere.chat({
+//       model: "command",
+//       message: "Tell me a story in 5 parts!",
+//     });
+//     const botMessageContent = chat.text;
+
+//     console.log(chat);
+//     aiState.done({
+//       ...aiState.get(),
+//       messages: [
+//         ...aiState.get().messages,
+//         {
+//           id: nanoid(),
+//           role: 'assistant',
+//           content: botMessageContent
+//         }
+//       ]
+//     });
+//     return {
+//       id: nanoid(),
+//       display: <BotMessage content={botMessageContent} />
+//     };
+//   })();
+//   // try {
+//   // const response = await fetch('https://api.cohere.ai/v1/generate', {
+//   //   method: 'POST',
+//   //   headers: {
+//   //     'Content-Type': 'application/json',
+//   //     'Authorization': 'Bearer OnUumoosME9Y9pZO99rkRgQSKir9QylPor1bhkjg',
+//   //   },
+//   //   body: JSON.stringify({
+//   //     prompt: content,
+//   //     model: 'command-nightly',
+//   //     max_tokens: 300,
+//   //     stop_sequences: [],
+//   //     temperature: 0.9,
+//   //     return_likelihoods: 'NONE',
+//   //     // stream: true,
+//   //     stream: true,
+//   //     connector: [{
+//   //       "id": "web-search",
+//   //       "options": {
+//   //         "site": "https://www.ncbi.nlm.nih.gov/pmc/"
+//   //       }
+//   //     }]
+
+//   //   })
+//   // });
+//   // const response = 0;
+//   // if (!response.ok) {
+//   //   throw new Error(`Error ${response.status}: ${await response.text()}`);
+//   // }
+//   // if (response.ok) {
+//   //   throw new Error(`Error bale bale${response.status}: ${await response.text()}`);
+//   // }
+
+//   // const responseText = await response.text();
+//   // const responseBodyArray = responseText.trim().split('\n');
+
+//   // let botMessageContent = '';
+
+//   // for (const responseBody of responseBodyArray) {
+//   //   const parsedResponse = JSON.parse(responseBody);
+//   //   if (parsedResponse.text) {
+//   //     botMessageContent += parsedResponse.text;
+//   //   }
+//   // }
+
+//   // console.log(botMessageContent);
+//   // const responseBody = await response.json();
+//   // console.log(responseBody);
+//   // const botMessageContent = responseBody.text;
+
+
+//   // aiState.done({
+//   //   ...aiState.get(),
+//   //   messages: [
+//   //     ...aiState.get().messages,
+//   //     {
+//   //       id: nanoid(),
+//   //       role: 'assistant',
+//   //       content: botMessageContent
+//   //     }
+//   //   ]
+//   // });
+
+//   return {
+//     // id: nanoid(),
+//     // display: <BotMessage content={botMessageContent} />
+//   };
+//   // } catch (error) {
+//   //   console.error('Error submitting user message:', error);
+
+//   //   // Return an error message to display in the UI
+//   //   return {
+//   //     id: nanoid(),
+//   //     display: <SystemMessage>Error processing user message. Please try again later.</SystemMessage>
+//   //   };
+//   // }
+// }
 
 
 export type Message = {
