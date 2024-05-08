@@ -56,7 +56,7 @@ export function Chat({ id, session, missingKeys }: ChatProps) {
     <>
       {session ? (
         <div className="group w-full overflow-auto pl-0 peer-[[data-state=open]]:lg:pl-[250px] peer-[[data-state=open]]:xl:pl-[300px]" ref={scrollRef}>
-          <div className="" ref={messagesRef}>
+          <div className="py-10" ref={messagesRef}>
             {messages.length ? (
               <ChatList messages={messages} isShared={false} session={session} />
             ) : (
