@@ -1,6 +1,6 @@
 import { GeistSans } from 'geist/font/sans'
 import { GeistMono } from 'geist/font/mono'
-
+import cover from '@/public/cover.png'
 import '@/app/globals.css'
 import { cn } from '@/lib/utils'
 import { TailwindIndicator } from '@/components/tailwind-indicator'
@@ -18,9 +18,9 @@ export const metadata = {
   },
   description: 'An AI-powered chatbot template built with Next.js and Vercel.',
   icons: {
-    icon: '/favicon.ico',
-    shortcut: '/favicon-16x16.png',
-    apple: '/apple-touch-icon.png'
+    icon: '/profile.png',
+    shortcut: '/profile.png',
+    apple: '/profile.png'
   }
 }
 
