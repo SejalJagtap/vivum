@@ -10,10 +10,10 @@ export default function Marketing() {
                             <div className="flex flex-col justify-center space-y-4">
                                 <div className="space-y-2">
                                     <h1 className="text-2xl font-bold tracking-tighter sm:text-5xl xl:text-6xl/none dark:text-gray-50">
-                                        Presenting <span className="text-transparent bg-gradient-to-r from-purple-600 to-blue-500 bg-clip-text">Vivum</span>, <div>your Research Assistant</div>
+                                        Presenting <span className="text-transparent bg-gradient-to-r from-purple-600 to-blue-500 bg-clip-text">Vivum</span> <div className="text-1xl pt-2 font-bold tracking-tighter sm:text-3xl xl:text-4xl/none dark:text-gray-50" >Your Research Ainvented </div>
                                     </h1>
                                     <p className="w-full text-gray-500 md:text-lg text-sm dark:text-gray-400 py-10">
-                                        Vivum revolutionizes medical literature search and manuscript creation through an AI-powered platform. Seamlessly access and explore the extensive PubMed database with precision and efficiency.
+                                        Vivum revolutionizes medical literature search and manuscript creation through an AI-powered platform. Seamlessly access and explore the extensive PubMed with precision and efficiency.
                                     </p>
                                 </div>
                                 <div className="flex flex-col sm:flex-row gap-4 justify-center">
