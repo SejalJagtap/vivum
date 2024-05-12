@@ -5,18 +5,19 @@ import Link from 'next/link'
 import { auth } from '@/auth'
 import Image from 'next/image';
 import { Button } from '@/components/ui/button'
-import {
-  // IconGitHub,
+// import {
+//   // IconGitHub,
 
-  IconSeparator,
-  // IconVercel
-} from '@/components/ui/icons'
+//   IconSeparator,
+//   // IconVercel
+// } from '@/components/ui/icons'
 import { UserMenu } from '@/components/user-menu'
 import { SidebarMobile } from './sidebar-mobile'
 import { SidebarToggle } from './sidebar-toggle'
 import { ChatHistory } from './chat-history'
 import { Session } from '@/lib/types'
 import logo from '@/public/profile.png'
+import logo2 from '@/public/default.png'
 async function UserOrLogin() {
   const session = (await auth()) as Session
   return (
@@ -36,23 +37,32 @@ async function UserOrLogin() {
         </Link>
       )}
       <div className="flex items-center">
-        <IconSeparator className="size-6 text-muted-foreground/50" />
         {session?.user ? (
+          <div>
+        {/* <IconSeparator className="size-6 text-muted-foreground/50" /> */}
+
           <UserMenu user={session.user} />
+          </div>
         ) : (
-          <Button variant="link" asChild className="-ml-2">
+          <div className='pr-5'>
+          <Button  asChild className="-ml-2">
             <Link href="/login">Login</Link>
           </Button>
-        )}
+          </div>
+        )}  
+            <div className='pr-2'>
+              <Image src={logo2} alt="Description of your image" width={55} height={55} />
+            </div>
       </div>
+      {/* <Image src={logo2} alt="Description of your image" width={50} height={50} /> */}
     </>
   )
 }
 
 export function Header() {
   return (
-    <header className="sticky top-0 z-50 flex items-center justify-between w-full h-16 px-4 border-b shrink-0 bg-gradient-to-b from-background/10 via-background/50 to-background/80 backdrop-blur-xl">
-      <div className="flex items-center">
+    <header className="sticky top-0 z-50 flex items-center w-full h-16 px-4 border-b shrink-0 bg-gradient-to-b from-background/10 via-background/50 to-background/80 backdrop-blur-xl">
+      <div className="flex items-center w-full justify-between">
         <React.Suspense fallback={<div className="flex-1 overflow-auto" />}>
           <UserOrLogin />
         </React.Suspense>
