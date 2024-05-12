@@ -5,7 +5,7 @@ import Textarea from 'react-textarea-autosize'
 
 import { useActions, useUIState } from 'ai/rsc'
 
-import { UserMessage } from './stocks/message'
+import { BotMessage, UserMessage } from './stocks/message'
 import { type AI } from '@/lib/chat/actions'
 import { Button } from '@/components/ui/button'
 import { IconArrowElbow, IconPlus } from '@/components/ui/icons'
@@ -18,14 +18,29 @@ import {
 import { useEnterSubmit } from '@/lib/hooks/use-enter-submit'
 import { nanoid } from 'nanoid'
 import { useRouter } from 'next/navigation'
+import { useCompletion } from 'ai/react';
+import { FormEventHandler, useState } from 'react';
 
-export function PromptForm({
-  input,
-  setInput
-}: {
-  input: string
-  setInput: (value: string) => void
-}) {
+// {
+//   // input,
+//   // setInput
+// }: {
+//   // input: string
+//   // setInput: (value: string) => void
+//   }
+
+
+export function PromptForm() {
+  const {
+    completion,
+    input,
+    setInput,
+    handleInputChange,
+    handleSubmit,
+    error,
+  } = useCompletion();
+
+  const [prompt, setPrompt] = useState('');
   const router = useRouter()
   const { formRef, onKeyDown } = useEnterSubmit()
   const inputRef = React.useRef<HTMLTextAreaElement>(null)
@@ -42,6 +57,7 @@ export function PromptForm({
     <form
       ref={formRef}
       onSubmit={async (e: any) => {
+        handleSubmit(e)
         e.preventDefault()
 
         // Blur focus on mobile
@@ -61,10 +77,19 @@ export function PromptForm({
             display: <UserMessage>{value}</UserMessage>
           }
         ])
+        console.log("step1")
+
 
         // Submit and get response message
-        const responseMessage = await submitUserMessage(value)
-        setMessages(currentMessages => [...currentMessages, responseMessage])
+        // const responseMessage = await submitUserMessage(value)
+        // setMessages(currentMessages => [...currentMessages, responseMessage])
+        setMessages(currentMessages => [
+          ...currentMessages,
+          {
+            id: nanoid(),
+            display: <BotMessage content={completion}></BotMessage>
+          }
+        ])
       }}
     >
       <div className="relative flex max-h-60 w-full grow flex-col overflow-hidden bg-background px-8 sm:rounded-md sm:border sm:px-12">

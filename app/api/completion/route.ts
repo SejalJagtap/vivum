@@ -16,7 +16,15 @@ export async function POST(req: Request) {
     prompt_truncation: "AUTO",
     stream: true,
     chat_history: requestBody.chat_history,
-    connectors: [{ "id": "web-search" }]
+    connectors: [
+      {
+        "id": "web-search",
+        "options": {
+          "site": "https://www.ncbi.nlm.nih.gov/pmc/"
+        }
+      }
+    ],
+    // prompt_truncation: "AUTO"
   });
 
   const response = await fetch(endpoint, {

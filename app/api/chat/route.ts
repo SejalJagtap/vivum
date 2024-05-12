@@ -1,43 +1,52 @@
-import { CohereClient, Cohere } from 'cohere-ai';
-
-export const dynamic = 'force-dynamic';
-
-const cohere = new CohereClient({
-  token: process.env.COHERE_API_KEY || '',
-});
-
-const toCohereRole = (role: string): Cohere.ChatMessageRole => {
-  if (role === 'user') {
-    return Cohere.ChatMessageRole.User;
-  }
-  return Cohere.ChatMessageRole.Chatbot;
-};
+import { CohereStream, StreamingTextResponse } from 'ai';
 
 export async function POST(req: Request) {
-  // Extract the `messages` from the body of the request
-  const { messages } = await req.json();
-  const chatHistory = messages.map((message: any) => ({
-    message: message.content,
-    role: toCohereRole(message.role),
-  }));
-  const lastMessage = chatHistory.pop();
+  // Extract the full body from the request
+  const requestBody = await req.json();
 
-  const response = await cohere.chatStream({
-    message: lastMessage.message,
-    chatHistory,
-  });
+  // Define API endpoint
+  const endpoint = 'https://api.cohere.ai/v1/generate';
 
-  const stream = new ReadableStream({
-    async start(controller) {
-      for await (const event of response) {
-        // Stream Events: https://docs.cohere.com/docs/streaming#stream-events
-        if (event.eventType === 'text-generation') {
-          controller.enqueue(event.text);
+  // Prepare the request body including all required parameters
+  const apiRequestBody = JSON.stringify({
+    model: 'command-nightly', // Adjusted to your specified model
+    prompt: requestBody.prompt,
+    max_tokens: 300,
+    temperature: 0.3,
+    prompt_truncation: "AUTO",
+    stream: true,
+    chat_history: requestBody.chat_history,
+    connectors: [
+      {
+        "id": "web-search",
+        "options": {
+          "site": "https://www.ncbi.nlm.nih.gov/pmc/"
         }
       }
-      controller.close();
-    },
+    ],
+    // prompt_truncation: "AUTO"
   });
 
-  return new Response(stream);
+  const response = await fetch(endpoint, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${process.env.COHERE_API_KEY}`,
+    },
+    body: apiRequestBody,
+  });
+
+  // Check for errors
+  if (!response.ok) {
+    return new Response(await response.text(), {
+      status: response.status,
+    });
+  }
+  // console.log(response.ok)
+
+  // Extract the text response from the Cohere stream
+  const stream = CohereStream(response);
+  console.log(stream)
+  // Respond with the stream
+  return new StreamingTextResponse(stream);
 }

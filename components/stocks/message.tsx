@@ -25,22 +25,34 @@ export function UserMessage({ children }: { children: React.ReactNode }) {
     </div>
   )
 }
-
+import { useCompletion } from 'ai/react';
 export function BotMessage({
   content,
   className
 }: {
-  content: string | StreamableValue<string>
+  content: any
   className?: string
 }) {
   const text = useStreamableText(content)
+  // const {
+  //   completion,
+  //   // setCompletion
+
+  // } = useCompletion();
+  // setCompletion(content)
+
+
 
   return (
     <div className={cn('group relative flex items-start md:-ml-12', className)}>
       <div className="flex size-[24px] shrink-0 select-none items-center justify-center rounded-md border bg-primary text-primary-foreground shadow-sm">
         <FaRobot size={24} />
       </div>
-      <div className="ml-4 flex-1 space-y-2 overflow-hidden px-1">
+      {content && (<div className="ml-4 flex-1 space-y-2 overflow-hidden px-1">
+        {/* {content} */}
+
+
+
         <MemoizedReactMarkdown
           className="prose break-words dark:prose-invert prose-p:leading-relaxed prose-pre:p-0"
           remarkPlugins={[remarkGfm, remarkMath]}
@@ -82,7 +94,7 @@ export function BotMessage({
         >
           {text}
         </MemoizedReactMarkdown>
-      </div>
+      </div>)}
     </div>
   )
 }
